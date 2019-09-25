@@ -1,23 +1,19 @@
 defmodule Proj2 do
 
+  Process.register self(), Main
   numNodes = 5
   topology = :full
   algorithm = :gossip
 
 #  {:ok, listener} = Listener.start_link([])
 
-  case {topology} do
-    {:full} ->
-      IO.puts("Setting up #{topology} network")
-      supervisorId = Full.initiate(numNodes, algorithm)
-      IO.inspect(supervisorId)
-      IO.puts("Starting up #{topology} network")
-      Full.startNetwork(supervisorId, algorithm)
-#      IO.puts("Finishing up #{topology} network")
-  end
+  Topology.createNetwork(numNodes, topology, algorithm)
+#  supervisorId = SuperV
+  StartNetwork.start(algorithm)
 
   receive do
-    {:done} ->
+    {:done} -> IO.puts "Main is done"
+    {:incomplete} -> IO.puts "Main is incomplete"
   end
 
 end
