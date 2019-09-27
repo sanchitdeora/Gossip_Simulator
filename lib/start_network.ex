@@ -9,6 +9,14 @@ defmodule StartNetwork do
 
     firstNode = Enum.random(childNames)
 
-    NodeNetwork.gossip(firstNode, {firstNode, algorithm, "MESSAGE"})
+    case algorithm do
+
+      :gossip -> NodeNetwork.gossip(firstNode, {firstNode, algorithm, "MESSAGE"})
+
+      :pushsum -> NodeNetwork.pushsum(firstNode, {firstNode, 0, 0})
+
+    end
+
+
   end
 end

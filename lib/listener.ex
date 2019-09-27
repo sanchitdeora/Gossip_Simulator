@@ -70,7 +70,7 @@ defmodule Listener do
       IO.puts("ALL FINISHED!!")
       a = Map.keys(neighbors_list) -- dead_nodes |> List.first
       count = NodeNetwork.getCount(a)
-      if(count > 5) do
+      if(count > 1) do
         send(Main, {:done})
       else
         send(Main, {:incomplete})
@@ -91,16 +91,17 @@ defmodule Listener do
       state = Map.replace!(state, :dead_nodes, dead_nodes)
       neighbors_list = Map.fetch!(state, :neighbors)
       neighbors_list_count = Enum.count(Map.keys(neighbors_list))
-
+      IO.inspect([dead_nodes | neighbors_list_count], label: "DEAD NODES")
       # terminating when all the nodes have terminated
       if Enum.count(dead_nodes) == neighbors_list_count do
-        # Enum.each(dead_nodes, fn node ->
-        #   state = NwNode.get_state(node)
-        #   s = Map.fetch!(state, :s)
-        #   w = Map.fetch!(state, :w)
-        #   IO.inspect(s / w)
-        # end)
-        # IO.puts("All done!!")
+        IO.inspect([dead_nodes | neighbors_list_count], label: "ALL DEAD")
+#         Enum.each(dead_nodes, fn node ->
+#           state = NodeNetwork.getState(node)
+#           s = Map.fetch!(state, :s)
+#           w = Map.fetch!(state, :w)
+#           IO.inspect(s / w)
+#         end)
+#         IO.puts("All done!!")
         send(Main, {:done})
       end
 
