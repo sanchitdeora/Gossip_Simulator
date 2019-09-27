@@ -2,7 +2,7 @@ defmodule Proj2 do
 
   Process.register self(), Main
   numNodes = 5
-  topology = :line
+  topology = :rand2D
   algorithm = :gossip
 
 #  {:ok, listener} = Listener.start_link([])
