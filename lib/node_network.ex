@@ -66,25 +66,28 @@ defmodule NodeNetwork do
 
     if count < 10 do
 
-#      if neighbors == [] do
-#        IO.puts("No neighbors to reach")
-#        Listener.delete_me(MyListener, server)
-#        Full.startNetwork(supervisorId, algorithm)
-#        {:noreply, state}
-#      else
+      if neighbors == [] do
+        IO.puts("No neighbors to reach")
+        Listener.delete_me(MyListener, server)
+        StartNetwork.start(algorithm)
+        {:noreply, state}
+      else
 
         nextNeighbor = Enum.random(neighbors)
         IO.inspect([server | nextNeighbor], label: "Next Neighbor")
         NodeNetwork.gossip(nextNeighbor, {nextNeighbor, algorithm, "MESSAGE"})
 
-        if count < 5 do
+#        if count < 5 do
           NodeNetwork.gossip(server, {server, algorithm, "MESSAGE"})
-        end
+#          else
+#          IO.inspect(server, label: "Count > 5")
+#        end
 
         state = Map.replace!(state, :message, message)
         {:noreply, Map.replace!(state, :count, count + 1)}
+      end
     else
-#       IO.puts("I'm done #{server} || #{count}")
+       IO.puts("I'm done #{server} || #{count}")
       # delete current node from all the neighbors list
       Enum.each(Map.get(state, :neighbors), fn neighbor_node ->
         NodeNetwork.removeNeighbor(neighbor_node, server)
@@ -92,6 +95,6 @@ defmodule NodeNetwork do
        Listener.gossip_done(MyListener, server)
       {:noreply, state}
     end
-
   end
 end
+

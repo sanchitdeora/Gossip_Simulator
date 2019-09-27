@@ -22,12 +22,12 @@ defmodule Topology do
     {:ok, listener} = Listener.start_link(name: MyListener)
 
     childNodes = Supervisor.which_children(pid)
-    IO.inspect(childNodes)
+#    IO.inspect(childNodes)
 
     childNames =
-      Enum.map(childNodes, fn curr_node ->
-        {curr_name, _, _, _} = curr_node
-        curr_name
+      Enum.map(childNodes, fn currNode ->
+        {currName, _, _, _} = currNode
+        currName
       end)
 
     IO.inspect(childNames)
@@ -36,21 +36,40 @@ defmodule Topology do
       :full -> fullNetwork(childNames)
 
       :line -> lineNetwork(childNames)
+
+
     end
   end
 
   def fullNetwork(childNames) do
 
-    Enum.map(childNames, fn curr_name ->
-      NodeNetwork.setNeighbors(curr_name, List.delete(childNames, curr_name))
-      Listener.set_neighbors(MyListener, {curr_name, List.delete(childNames, curr_name)})
+    Enum.map(childNames, fn currName ->
+      NodeNetwork.setNeighbors(currName, List.delete(childNames, currName))
+      Listener.set_neighbors(MyListener, {currName, List.delete(childNames, currName)})
     end)
 
   end
 
   def lineNetwork(childNames) do
+#    IO.inspect(length(childNames))
+    first = Enum.fetch!(childNames, 0)
+    NodeNetwork.setNeighbors(first, [Enum.fetch!(childNames, 1)])
+    Listener.set_neighbors(MyListener, {first, [Enum.fetch!(childNames, 1)]})
+
+    c = Enum.map(1..length(childNames) - 2, fn i ->
+      prev = Enum.fetch!(childNames, (i - 1))
+      next = Enum.fetch!(childNames, (i + 1))
+      current = Enum.fetch!(childNames, i)
+      NodeNetwork.setNeighbors(current, [prev] ++ [next])
+      Listener.set_neighbors(MyListener, {current, [prev] ++ [next]})
+    end)
+
+    last = Enum.fetch!(childNames, (length(childNames)-1))
+    NodeNetwork.setNeighbors(last, [Enum.fetch!(childNames, (length(childNames)-2))])
+    Listener.set_neighbors(MyListener, {last, [Enum.fetch!(childNames, (length(childNames)-2))]})
 
   end
+
 
 
 end

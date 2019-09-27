@@ -11,5 +11,4 @@ defmodule StartNetwork do
 
     NodeNetwork.gossip(firstNode, {firstNode, algorithm, "MESSAGE"})
   end
-
 end
