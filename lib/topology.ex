@@ -37,6 +37,10 @@ defmodule Topology do
       :line -> lineNetwork(childNames)
 
       :rand2D -> rand2DNetwork(childNames)
+
+      :honeycomb -> HoneycombNetwork.create(childNames, false)
+
+      :randhoneycomb -> HoneycombNetwork.create(childNames, true)
     end
   end
 
@@ -78,7 +82,7 @@ defmodule Topology do
 #    IO.inspect(positions)
     Enum.map(positions, fn currChild ->
       neighbors = rand2DNeighbors(currChild, positions) |> Enum.filter(& !is_nil(&1))
-      IO.inspect(neighbors)
+#      IO.inspect(neighbors)
       {current, _} = currChild
       NodeNetwork.setNeighbors(current, neighbors)
       Listener.set_neighbors(MyListener, {current, neighbors})
