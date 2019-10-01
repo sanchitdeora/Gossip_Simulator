@@ -2,8 +2,8 @@ defmodule Proj2 do
 
   Process.register self(), Main
 
-  numNodes = 16
-  topology = :randhoneycomb
+  numNodes = 17
+  topology = :honeycomb
   algorithm = :pushsum
 
 #  {:ok, listener} = Listener.start_link([])

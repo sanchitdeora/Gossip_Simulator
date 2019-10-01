@@ -1,21 +1,54 @@
 defmodule Topology do
 
   def createNetwork(numNodes, topology, algorithm) do
+
+    case topology do
+      :full ->  childNames = createChild(numNodes, algorithm)
+                fullNetwork(childNames)
+
+      :line ->  childNames = createChild(numNodes, algorithm)
+                lineNetwork(childNames)
+
+      :rand2D -> childNames = createChild(numNodes, algorithm)
+                 rand2DNetwork(childNames)
+
+      :torus3D -> max = findMax(numNodes)
+                  IO.inspect(max, label: "max")
+                  newNumNodes = calculateNodes(max, numNodes)
+                  IO.inspect(newNumNodes, label: "#{max}")
+
+                  childNames = createChild(newNumNodes, algorithm)
+                  Torus3DNetwork.create(childNames, max)
+
+      :honeycomb -> newNumNodes =
+                      if rem(numNodes, 16) != 0 do
+                        newNumNodes = numNodes - rem(numNodes, 16) + 16
+                      else
+                        numNodes
+                      end
+                    childNames = createChild(newNumNodes, algorithm)
+                    HoneycombNetwork.create(childNames, false)
+
+      :randhoneycomb -> childNames = createChild(numNodes, algorithm)
+                        HoneycombNetwork.create(childNames, true)
+    end
+
+  end
+
+  def createChild(numNodes, algorithm) do
+
     children =
       Enum.map(0..(numNodes - 1), fn i ->
         nodeName = ("N" <> Integer.to_string(i)) |> String.to_atom
 
         %{
-            id: nodeName,
-            start: {NodeNetwork, :start_link, [{algorithm, i}, [name: nodeName]]}
+          id: nodeName,
+          start: {NodeNetwork, :start_link, [{algorithm, i}, [name: nodeName]]}
         }
       end)
     IO.inspect(children)
-    createChild(children , topology)
 
-  end
 
-  def createChild(children, topology) do
     {:ok, pid} = Supervisor.start_link(children, strategy: :one_for_one)
     Process.register pid, SuperV
     {:ok, listener} = Listener.start_link(name: MyListener)
@@ -31,17 +64,7 @@ defmodule Topology do
 
     IO.inspect(childNames)
 
-    case topology do
-      :full -> fullNetwork(childNames)
 
-      :line -> lineNetwork(childNames)
-
-      :rand2D -> rand2DNetwork(childNames)
-
-      :honeycomb -> HoneycombNetwork.create(childNames, false)
-
-      :randhoneycomb -> HoneycombNetwork.create(childNames, true)
-    end
   end
 
   def fullNetwork(childNames) do
@@ -104,6 +127,28 @@ defmodule Topology do
     end)
   end
 
+  def findMax(n) when (n < 27) do
+    2
+  end
+  def findMax(n) when (n < 64 and n >= 27) do
+    3
+  end
 
+  def findMax(n) do
+    maxList = Enum.map(6..3, fn x ->
+      {calculateNodes(x, n), x}
+    end)
+    maxList = Enum.sort(maxList)
+    {_, max} = List.first(maxList)
+    IO.inspect(max)
+  end
 
+  def calculateNodes(max, n) do
+#    IO.inspect(max, label: "#{n}")
+    each_n = (n / max) |> :math.ceil() |> trunc
+    sq_root = :math.sqrt(each_n)
+    each_n = (:math.ceil(sq_root) * :math.ceil(sq_root)) |> trunc
+    n = each_n * max
+    n
+  end
 end

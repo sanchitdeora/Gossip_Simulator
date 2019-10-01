@@ -7,7 +7,7 @@ defmodule NodeNetwork do
   end
 
   def updateNeighbors(server, args) do
-    GenServer.cast(server, {:updateNeighbors, args})
+    GenServer.cast(server, {:updateNeighbors, [server | args]})
   end
 
   def setNeighbors(server, args) do
@@ -63,14 +63,15 @@ defmodule NodeNetwork do
 
   def handle_cast({:setNeighbors, args}, state) do
     state = Map.replace!(state, :neighbors, args)
-#    IO.inspect(state)
+    IO.inspect(state)
     {:noreply, state}
   end
 
-  def handle_cast({:updateNeighbors, nodeName}, state) do
+  def handle_cast({:updateNeighbors, args}, state) do
+    [server | nodeName] = args
     neighbors = Map.fetch!(state, :neighbors)
     neighbors = neighbors ++ [nodeName]
-#    IO.inspect(neighbors)
+    IO.inspect(neighbors, label: "#{server}")
     state = Map.replace!(state, :neighbors, neighbors)
     {:noreply, state}
   end
@@ -103,7 +104,7 @@ defmodule NodeNetwork do
       else
 
         nextNeighbor = Enum.random(neighbors)
-#        IO.inspect([server | nextNeighbor], label: "Next Neighbor")
+        IO.inspect([server | nextNeighbor], label: "Next Neighbor")
         NodeNetwork.gossip(nextNeighbor, {nextNeighbor, algorithm, "MESSAGE"})
 
         if count < 5 do
@@ -116,7 +117,7 @@ defmodule NodeNetwork do
         {:noreply, Map.replace!(state, :count, count + 1)}
       end
     else
-#       IO.puts("I'm done #{server} || #{count}")
+       IO.puts("I'm done #{server} || #{count}")
       # delete current node from all the neighbors list
       Enum.each(Map.get(state, :neighbors), fn neighbor_node ->
         NodeNetwork.removeNeighbor(neighbor_node, server)

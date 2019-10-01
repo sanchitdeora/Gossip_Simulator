@@ -3,13 +3,7 @@ defmodule HoneycombNetwork do
   def create(childNames, randomNeighborBool) do
 
     numNodes = length(childNames)
-#
-#    num_node =
-#      if rem(numNodes, 16) != 0 do
-#        num_node = numNodes - rem(numNodes, 16) + 16
-#      else
-#        numNodes
-#      end
+
     # Create the required number of nodes and get the list of all nodes
     childList = createStructure(childNames, 0, 0)
 
@@ -128,8 +122,8 @@ defmodule HoneycombNetwork do
     IO.inspect(otherNodes, label: "other nodes of #{child}")
     randomNeighbor = Enum.random(otherNodes)
     IO.inspect(randomNeighbor, label: "#{child}")
-    NodeNetwork.updateNeighbors(child, randomNeighbor)
-    NodeNetwork.updateNeighbors(randomNeighbor, child)
+    NodeNetwork.updateNeighbors(child, [randomNeighbor])
+    NodeNetwork.updateNeighbors(randomNeighbor, [child])
     randomList = randomList -- [child]
     randomList = randomList -- [randomNeighbor]
 
