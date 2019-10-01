@@ -1,5 +1,8 @@
 defmodule StartNetwork do
   def start(algorithm) do
+
+
+
     childNodes = Supervisor.which_children(SuperV)
     childNames =
       Enum.map(childNodes, fn currentNode ->
@@ -7,14 +10,22 @@ defmodule StartNetwork do
         currentName
       end)
 
-    firstNode = Enum.random(childNames)
+    dead_nodes = Listener.get_dead_nodes(MyListener)
+    alive_nodes = childNames -- dead_nodes
+    IO.inspect([alive_nodes], label: "ALIVE NODES:")
 
-    case algorithm do
+    if length(alive_nodes) > 1 do
+      firstNode = Enum.random(childNames)
 
-      :gossip -> NodeNetwork.gossip(firstNode, {firstNode, algorithm, "MESSAGE"})
+      case algorithm do
 
-      :pushsum -> NodeNetwork.pushsum(firstNode, {firstNode, 0, 0})
+        :gossip -> NodeNetwork.gossip(firstNode, {firstNode, algorithm, "MESSAGE"})
 
+        :pushsum -> NodeNetwork.pushsum(firstNode, {firstNode, 0, 0})
+      end
+    else
+      IO.puts("!!!!!!!!!!!!!!!!!!!! GOT DONE HEREE !!!!!!!!!!!!!!!!")
+      send Main, {:done}
     end
 
 

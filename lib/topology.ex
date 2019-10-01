@@ -52,7 +52,7 @@ defmodule Topology do
           start: {NodeNetwork, :start_link, [{algorithm, i}, [name: nodeName]]}
         }
       end)
-    IO.inspect(children)
+#    IO.inspect(children)
 
 
     {:ok, pid} = Supervisor.start_link(children, strategy: :one_for_one)
@@ -60,7 +60,7 @@ defmodule Topology do
     {:ok, listener} = Listener.start_link(name: MyListener)
 
     childNodes = Supervisor.which_children(pid)
-    IO.inspect(childNodes)
+#    IO.inspect(childNodes)
 
     childNames =
       Enum.map(childNodes, fn currNode ->
@@ -127,7 +127,7 @@ defmodule Topology do
 #      IO.inspect(next, label: "Inside")
       distance = :math.pow((x2 - x1),2) + :math.pow((y2 - y1),2) |> :math.sqrt()
 #      IO.inspect(distance)
-      if distance < 0.8 do
+      if distance < 0.6 do
         node2
       end
     end)

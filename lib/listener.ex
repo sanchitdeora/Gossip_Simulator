@@ -62,21 +62,14 @@ defmodule Listener do
     dead_nodes = Enum.uniq(dead_nodes)
 
     neighbors_list_count = Enum.count(Map.keys(neighbors_list))
-#    IO.inspect([dead_nodes | neighbors_list_count], label: "DEAD")
+    IO.inspect([dead_nodes | neighbors_list_count], label: "DEAD")
     # terminating when all the nodes are dead
     #    IO.inspect([[node_name | neighbors_list] | neighbors_list_count])
-    if Enum.count(dead_nodes) == (neighbors_list_count - 1) do
-
+    if Enum.count(dead_nodes) == neighbors_list_count - 1 do
       IO.puts("ALL FINISHED!!")
-      a = Map.keys(neighbors_list) -- dead_nodes |> List.first
-      count = NodeNetwork.getCount(a)
-      if(count > 1) do
-        send(Main, {:done})
-      else
-        send(Main, {:incomplete})
-      end
-
+      send(Main, {:done})
     end
+
 
     state = Map.replace!(state, :dead_nodes, dead_nodes)
     {:noreply, state}

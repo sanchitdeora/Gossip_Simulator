@@ -2,9 +2,9 @@ defmodule Proj2 do
 
   Process.register self(), Main
 
-  numNodes = 17
-  topology = :randhoneycomb
-  algorithm = :pushsum
+  numNodes = 500
+  topology = :rand2D
+  algorithm = :gossip
 
 #  {:ok, listener} = Listener.start_link([])
 
@@ -13,9 +13,7 @@ defmodule Proj2 do
 
   receive do
     {:done} ->
-        {_, t} = :erlang.statistics(:wall_clock)
-        IO.puts "Time taken to complete #{algorithm} is #{t} milliseconds"
-        IO.puts "Main is done"
+
 
         childNodes = Supervisor.which_children(SuperV)
 
@@ -32,7 +30,7 @@ defmodule Proj2 do
 
             :pushsum ->
               state = NodeNetwork.getState(currentName)
-#                IO.inspect(currentName, label: "state")
+                IO.inspect(state, label: "#{currentName}")
               s = Map.fetch!(state, :s)
               w = Map.fetch!(state, :w)
               queue = Map.fetch!(state, :queue)
@@ -40,6 +38,9 @@ defmodule Proj2 do
 
           end
         end)
+        {_, t} = :erlang.statistics(:wall_clock)
+        IO.puts "Time taken to complete #{algorithm} is #{t} milliseconds"
+        IO.puts "Main is done"
 
     {:incomplete} -> IO.puts "Main is incomplete"
   end

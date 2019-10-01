@@ -11,7 +11,7 @@ defmodule NodeNetwork do
   end
 
   def setNeighbors(server, args) do
-    GenServer.cast(server, {:setNeighbors, args})
+    GenServer.cast(server, {:setNeighbors, [server | args]})
   end
 
   def getNeighbors(server) do
@@ -22,8 +22,8 @@ defmodule NodeNetwork do
     GenServer.call(server, {:getState})
   end
 
-  def removeNeighbor(server, node_name) do
-    GenServer.cast(server, {:removeNeighbor, node_name})
+  def removeNeighbor(server, args) do
+    GenServer.cast(server, {:removeNeighbor, [server | args]})
   end
 
   def getCount(server) do
@@ -62,8 +62,9 @@ defmodule NodeNetwork do
   end
 
   def handle_cast({:setNeighbors, args}, state) do
+    [server | args] = args
     state = Map.replace!(state, :neighbors, args)
-    IO.inspect(state)
+    IO.inspect(state, label: "#{server}")
     {:noreply, state}
   end
 
@@ -76,10 +77,13 @@ defmodule NodeNetwork do
     {:noreply, state}
   end
 
-  def handle_cast({:removeNeighbor, nodeName}, state) do
+  def handle_cast({:removeNeighbor, args}, state) do
+    [server | nodeName] = args
+#    IO.inspect(nodeName, label: "INSIDE REMOVE NEIGHBOR for #{server} sent by ")
     neighbors = Map.fetch!(state, :neighbors)
     neighbors = List.delete(neighbors, nodeName)
     state = Map.replace!(state, :neighbors, neighbors)
+#    IO.inspect([neighbors], label: "NEIGHBOR #{nodeName} REMOVED from #{server}")
     {:noreply, state}
   end
 
@@ -90,9 +94,10 @@ defmodule NodeNetwork do
     count = Map.get(state, :count)
 #    count = count + 1
 #    state = Map.replace!(state, :count, count)
-    IO.inspect([server | count])
+
     neighbors = Map.get(state, :neighbors)
 #    IO.inspect(neighbors)
+    IO.inspect([count | [neighbors]], label: "#{server}")
 
     if count < 10 do
 
@@ -108,8 +113,9 @@ defmodule NodeNetwork do
         NodeNetwork.gossip(nextNeighbor, {nextNeighbor, algorithm, "MESSAGE"})
 
         if count < 5 do
+#          state = Map.replace!(state, :count, (count - 1))
           NodeNetwork.gossip(server, {server, algorithm, "MESSAGE"})
-#          else
+#          {:noreply, state}
 #          IO.inspect(server, label: "Count > 5")
         end
 
@@ -117,12 +123,24 @@ defmodule NodeNetwork do
         {:noreply, Map.replace!(state, :count, count + 1)}
       end
     else
-       IO.puts("I'm done #{server} || #{count}")
+      IO.inspect([count | [neighbors]], label: "I'm done #{server}")
+
       # delete current node from all the neighbors list
       Enum.each(Map.get(state, :neighbors), fn neighbor_node ->
+#        IO.inspect([neighbor_node], label: "INSIDE ENUM.each for #{server}, Current Neighbor being")
         NodeNetwork.removeNeighbor(neighbor_node, server)
+        NodeNetwork.removeNeighbor(server, neighbor_node)
       end)
+#        state = Map.replace!(state, :neighbors, [])
        Listener.gossip_done(MyListener, server)
+
+      if neighbors == [] do
+        IO.inspect(Map.get(state, :neighbors),label: "No neighbors to reach for #{server}!!!!!!!!!!!!!!!!!!!!!!!")
+        Listener.delete_me(MyListener, server)
+        StartNetwork.start(algorithm)
+        {:noreply, state}
+      end
+
       {:noreply, state}
     end
   end
