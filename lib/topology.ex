@@ -29,7 +29,13 @@ defmodule Topology do
                     childNames = createChild(newNumNodes, algorithm)
                     HoneycombNetwork.create(childNames, false)
 
-      :randhoneycomb -> childNames = createChild(numNodes, algorithm)
+      :randhoneycomb -> newNumNodes =
+                          if rem(numNodes, 16) != 0 do
+                            newNumNodes = numNodes - rem(numNodes, 16) + 16
+                          else
+                            numNodes
+                          end
+                        childNames = createChild(newNumNodes, algorithm)
                         HoneycombNetwork.create(childNames, true)
     end
 

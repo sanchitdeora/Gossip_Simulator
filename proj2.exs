@@ -3,13 +3,12 @@ defmodule Proj2 do
   Process.register self(), Main
 
   numNodes = 17
-  topology = :honeycomb
+  topology = :randhoneycomb
   algorithm = :pushsum
 
 #  {:ok, listener} = Listener.start_link([])
 
   Topology.createNetwork(numNodes, topology, algorithm)
-#  supervisorId = SuperV
   StartNetwork.start(algorithm)
 
   receive do

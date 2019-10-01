@@ -107,7 +107,7 @@ defmodule HoneycombNetwork do
     end
   end
 
-  def addRandomNeighbor(randomList) when length(randomList) <= 1 do
+  def addRandomNeighbor(randomList) when length(randomList) <= 2 do
     []
   end
 
@@ -122,8 +122,8 @@ defmodule HoneycombNetwork do
     IO.inspect(otherNodes, label: "other nodes of #{child}")
     randomNeighbor = Enum.random(otherNodes)
     IO.inspect(randomNeighbor, label: "#{child}")
-    NodeNetwork.updateNeighbors(child, [randomNeighbor])
-    NodeNetwork.updateNeighbors(randomNeighbor, [child])
+    NodeNetwork.updateNeighbors(child, randomNeighbor)
+    NodeNetwork.updateNeighbors(randomNeighbor, child)
     randomList = randomList -- [child]
     randomList = randomList -- [randomNeighbor]
 

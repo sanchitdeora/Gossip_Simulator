@@ -133,21 +133,9 @@ defmodule Torus3DNetwork do
 
   defp torusNeighbors(d3array, sqroot_each_n, max) do
 
-#    elem = d3array[0][0][0]     => 002,020,200
-#            d3array[0][0][2]     => 000,022,202
-#             d3array[0][2][0]     => 022,000,220
-#             d3array[0][2][2]     => 020,002,222
-#
-#              d3array[2][0][0]     => 202,220,000
-#              d3array[2][0][2]     => 200,222,002
-#              d3array[2][2][0]     => 222,200,020
-#              d3array[2][2][2]     => 220,202,022
     Enum.each(0..(max - 1), fn z ->
         Enum.each(0..(sqroot_each_n - 1), fn y ->
             Enum.each(0..(sqroot_each_n), fn x ->
-#              z = edgeIndex(max, k)
-#              y = edgeIndex(sqroot_each_n, i)
-#              x = edgeIndex(sqroot_each_n, j)
 
               elem = d3array[z][y][x]
               cond do
@@ -175,18 +163,6 @@ defmodule Torus3DNetwork do
     NodeNetwork.setNeighbors(curr, neighbors_list)
     Listener.set_neighbors(MyListener, {curr, neighbors_list})
   end
-
-
-  defp edgeIndex(lastIndex, i) do
-      if i == 0 do
-        0
-      else
-        lastIndex - 1
-      end
-  end
-
-
-
 
   def from_list(list) when is_list(list) do
     do_from_list(list)
