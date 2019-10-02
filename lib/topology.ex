@@ -77,7 +77,7 @@ defmodule Topology do
 
     Enum.map(childNames, fn currName ->
       NodeNetwork.setNeighbors(currName, List.delete(childNames, currName))
-      Listener.set_neighbors(MyListener, {currName, List.delete(childNames, currName)})
+      Listener.setNeighbors(MyListener, {currName, List.delete(childNames, currName)})
     end)
 
   end
@@ -86,19 +86,19 @@ defmodule Topology do
 #    IO.inspect(length(childNames))
     first = Enum.fetch!(childNames, 0)
     NodeNetwork.setNeighbors(first, [Enum.fetch!(childNames, 1)])
-    Listener.set_neighbors(MyListener, {first, [Enum.fetch!(childNames, 1)]})
+    Listener.setNeighbors(MyListener, {first, [Enum.fetch!(childNames, 1)]})
 
     Enum.map(1..length(childNames) - 2, fn i ->
       prev = Enum.fetch!(childNames, (i - 1))
       next = Enum.fetch!(childNames, (i + 1))
       current = Enum.fetch!(childNames, i)
       NodeNetwork.setNeighbors(current, [prev] ++ [next])
-      Listener.set_neighbors(MyListener, {current, [prev] ++ [next]})
+      Listener.setNeighbors(MyListener, {current, [prev] ++ [next]})
     end)
 
     last = Enum.fetch!(childNames, (length(childNames)-1))
     NodeNetwork.setNeighbors(last, [Enum.fetch!(childNames, (length(childNames)-2))])
-    Listener.set_neighbors(MyListener, {last, [Enum.fetch!(childNames, (length(childNames)-2))]})
+    Listener.setNeighbors(MyListener, {last, [Enum.fetch!(childNames, (length(childNames)-2))]})
 
   end
 
@@ -114,7 +114,7 @@ defmodule Topology do
 #      IO.inspect(neighbors)
       {current, _} = currChild
       NodeNetwork.setNeighbors(current, neighbors)
-      Listener.set_neighbors(MyListener, {current, neighbors})
+      Listener.setNeighbors(MyListener, {current, neighbors})
     end)
   end
 

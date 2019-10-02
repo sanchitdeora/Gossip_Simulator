@@ -94,7 +94,7 @@ defmodule NodeNetwork do
     Enum.each(neighbors, fn neighbor ->
       NodeNetwork.removeNeighbor(neighbor, server)
     end)
-    Listener.delete_me(MyListener, server)
+    Listener.deleteCurrentNode(MyListener, server)
     {:noreply, state}
   end
 
@@ -115,7 +115,7 @@ defmodule NodeNetwork do
 
       if neighbors == [] do
 #        IO.puts("No neighbors to reach")
-        Listener.delete_me(MyListener, server)
+        Listener.deleteCurrentNode(MyListener, server)
         StartNetwork.start(algorithm)
         {:noreply, state}
       else
@@ -144,11 +144,11 @@ defmodule NodeNetwork do
         NodeNetwork.removeNeighbor(server, neighbor_node)
       end)
 #        state = Map.replace!(state, :neighbors, [])
-       Listener.gossip_done(MyListener, server)
+       Listener.gossipCompleted(MyListener, server)
 
       if neighbors == [] do
 #        IO.inspect(Map.get(state, :neighbors),label: "No neighbors to reach for #{server}!!!!!!!!!!!!!!!!!!!!!!!")
-        Listener.delete_me(MyListener, server)
+        Listener.deleteCurrentNode(MyListener, server)
         StartNetwork.start(algorithm)
         {:noreply, state}
       end
@@ -182,7 +182,7 @@ defmodule NodeNetwork do
     # when the current node has no neighbors to communicate
     if neighbors == [] do
 #      IO.inspect(Map.get(state, :neighbors),label: "No neighbors to reach for #{server}!!!!!!!!!!!!!!!!!!!!!!!")
-      Listener.delete_me(MyListener, server)
+      Listener.deleteCurrentNode(MyListener, server)
       StartNetwork.start(:pushsum)
       {:noreply, state}
     else
@@ -202,7 +202,7 @@ defmodule NodeNetwork do
           next_neighbor = Enum.random(Map.get(state, :neighbors))
           NodeNetwork.pushsum(next_neighbor, {next_neighbor, s_t, w_t})
 #          IO.inspect([[[next_neighbor]| [Map.fetch!(state, :s) / Map.fetch!(state, :w)]] | [Map.fetch!(state, :s) | Map.fetch!(state, :w)]] ,label: "ENDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD #{server}")
-          Listener.delete_me(MyListener, server)
+          Listener.deleteCurrentNode(MyListener, server)
           state = Map.replace!(state, :s, s_t)
           state = Map.replace!(state, :w, w_t)
 

@@ -2,22 +2,26 @@ defmodule Proj2 do
 
   Process.register self(), Main
 
-  numNodes = 2000
-  topology = :full
-  algorithm = :gossip
+#  numNodes = 2000
+#  topology = :full
+#  algorithm = :pushsum
+  [numNodes, topology, algorithm] = System.argv
 
-#  {:ok, listener} = Listener.start_link([])
-#  {:ok, god_pid} = God.start_link(name: God)
+  {numNodes, _} = Integer.parse(numNodes)
+  topology = String.to_atom(topology)
+  algorithm = String.to_atom(algorithm)
+
+#  {:ok, master_pid} = Master.start_link(name: MyMaster)
 
   Topology.createNetwork(numNodes, topology, algorithm)
-  {_, t1} = :erlang.statistics(:wall_clock)
-#  God.kill_nodes(god_pid)
+  {_, _t1} = :erlang.statistics(:wall_clock)
+#  IO.puts "Time taken to complete #{algorithm} is #{t1} milliseconds"
+#    Master.failNodes(master_pid)
     StartNetwork.start(algorithm)
 
   receive do
     {:done} ->
-#
-#
+
 #        childNodes = Supervisor.which_children(SuperV)
 #
 #        Enum.map(childNodes, fn currentNode ->
@@ -26,24 +30,17 @@ defmodule Proj2 do
 #
 #          neighbors = NodeNetwork.getNeighbors(currentName)
 #
-#
 #          case algorithm do
-#            :gossip ->
-#                count = NodeNetwork.getCount(currentName)
-#                IO.inspect([[neighbors] | count], label: "END #{currentName}")
-#
 #            :pushsum ->
 #              state = NodeNetwork.getState(currentName)
-#                IO.inspect(state, label: "#{currentName}")
 #              s = Map.fetch!(state, :s)
 #              w = Map.fetch!(state, :w)
-#              _queue = Map.fetch!(state, :queue)
-#              IO.inspect([[neighbors] | (s/w)], label: "END #{currentName}")
+#              IO.inspect((s/w)], label: "Value of s/w for #{currentName}")
 #
 #          end
 #        end)
         {_, t2} = :erlang.statistics(:wall_clock)
-        IO.puts "Time taken to complete #{algorithm} is #{t2 - t1} milliseconds"
+        IO.puts "Time taken to complete #{algorithm} is #{t2} milliseconds"
         IO.puts "Main is done"
 
     {:incomplete} -> IO.puts "Main is incomplete"

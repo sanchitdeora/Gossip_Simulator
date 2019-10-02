@@ -10,8 +10,8 @@ defmodule StartNetwork do
         currentName
       end)
 
-    dead_nodes = Listener.get_dead_nodes(MyListener)
-    alive_nodes = childNames -- dead_nodes
+    deadNodes = Listener.getDeadNodes(MyListener)
+    alive_nodes = childNames -- deadNodes
 #    IO.inspect([alive_nodes], label: "ALIVE NODES:")
 
     if length(alive_nodes) > 1 do

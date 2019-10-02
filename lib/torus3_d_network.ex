@@ -53,11 +53,11 @@ defmodule Torus3DNetwork do
                 array[i + 1][j]
               ]
 
-              set_neighbors(curr, neighbors_list)
+              setNeighbors(curr, neighbors_list)
 
             j == sq_root - 1 ->
               neighbors_list = [array[i][j - 1], array[i + 1][j]]
-              set_neighbors(curr, neighbors_list)
+              setNeighbors(curr, neighbors_list)
 
             true ->
               neighbors_list = [
@@ -66,7 +66,7 @@ defmodule Torus3DNetwork do
                 array[i][j - 1]
               ]
 
-              set_neighbors(curr, neighbors_list)
+              setNeighbors(curr, neighbors_list)
           end
 
         else
@@ -74,15 +74,15 @@ defmodule Torus3DNetwork do
             cond do
               j == 0 ->
                 neighbors_list = [array[i - 1][j], array[i][j + 1]]
-                set_neighbors(curr, neighbors_list)
+                setNeighbors(curr, neighbors_list)
 
               j == sq_root - 1 ->
                 neighbors_list = [array[i - 1][j], array[i][j - 1]]
-                set_neighbors(curr, neighbors_list)
+                setNeighbors(curr, neighbors_list)
 
               true ->
                 neighbors_list = [array[i][j - 1], array[i][j + 1], array[i - 1][j]]
-                set_neighbors(curr, neighbors_list)
+                setNeighbors(curr, neighbors_list)
             end
           end
         end
@@ -90,17 +90,17 @@ defmodule Torus3DNetwork do
 
         if j == 0 && (i != 0 && i != sq_root - 1) do
           neighbors_list = [array[i][j + 1], array[i - 1][j], array[i + 1][j]]
-          set_neighbors(curr, neighbors_list)
+          setNeighbors(curr, neighbors_list)
         end
 
         if j == sq_root - 1 && (i != 0 && i != sq_root - 1) do
           neighbors_list = [array[i][j - 1], array[i + 1][j], array[i - 1][j]]
-          set_neighbors(curr, neighbors_list)
+          setNeighbors(curr, neighbors_list)
         end
 
         if i != 0 && i != sq_root - 1 && j != 0 && j != sq_root - 1 do
           neighbors_list = [array[i][j - 1], array[i - 1][j], array[i][j + 1], array[i + 1][j]]
-          set_neighbors(curr, neighbors_list)
+          setNeighbors(curr, neighbors_list)
         end
       end)
     end)
@@ -113,17 +113,17 @@ defmodule Torus3DNetwork do
           cond do
             k == 0 ->
               NodeNetwork.updateNeighbors(d3array[k][i][j], d3array[k + 1][i][j])
-              Listener.update_neighbors(MyListener, {d3array[k][i][j], [d3array[k + 1][i][j]]})
+              Listener.updateNeighbors(MyListener, {d3array[k][i][j], [d3array[k + 1][i][j]]})
 
             k == max - 1 ->
               NodeNetwork.updateNeighbors(d3array[k][i][j], d3array[k - 1][i][j])
-              Listener.update_neighbors(MyListener, {d3array[k][i][j], [d3array[k - 1][i][j]]})
+              Listener.updateNeighbors(MyListener, {d3array[k][i][j], [d3array[k - 1][i][j]]})
 
             true ->
               NodeNetwork.updateNeighbors(d3array[k][i][j], d3array[k - 1][i][j])
               NodeNetwork.updateNeighbors(d3array[k][i][j], d3array[k + 1][i][j])
 
-              Listener.update_neighbors( MyListener, {d3array[k][i][j], [d3array[k - 1][i][j], d3array[k + 1][i][j]]})
+              Listener.updateNeighbors( MyListener, {d3array[k][i][j], [d3array[k - 1][i][j], d3array[k + 1][i][j]]})
           end
         end)
       end)
@@ -159,9 +159,9 @@ defmodule Torus3DNetwork do
       end)
   end
 
-  defp set_neighbors(curr, neighbors_list) do
+  defp setNeighbors(curr, neighbors_list) do
     NodeNetwork.setNeighbors(curr, neighbors_list)
-    Listener.set_neighbors(MyListener, {curr, neighbors_list})
+    Listener.setNeighbors(MyListener, {curr, neighbors_list})
   end
 
   def from_list(list) when is_list(list) do

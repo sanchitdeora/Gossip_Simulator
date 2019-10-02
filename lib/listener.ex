@@ -5,96 +5,86 @@ defmodule Listener do
     GenServer.start_link(__MODULE__, :ok, opts)
   end
 
-  def set_neighbors(server, args) do
-    GenServer.cast(server, {:set_neighbors, args})
+  def setNeighbors(server, args) do
+    GenServer.cast(server, {:setNeighbors, args})
   end
 
-  def update_neighbors(server, args) do
-    GenServer.cast(server, {:update_neighbors, args})
+  def updateNeighbors(server, args) do
+    GenServer.cast(server, {:updateNeighbors, args})
   end
 
-  def delete_me(server, node_name) do
-    # node_name is passed
-    GenServer.cast(server, {:delete_me, node_name})
+  def deleteCurrentNode(server, nodeName) do
+    # nodeName is passed
+    GenServer.cast(server, {:deleteCurrentNode, nodeName})
   end
 
-  def gossip_done(server, node_name) do
-    # node_name is passed
-    GenServer.cast(server, {:gossip_done, node_name})
+  def gossipCompleted(server, nodeName) do
+    # nodeName is passed
+    GenServer.cast(server, {:gossipCompleted, nodeName})
   end
 
-  def get_state(server) do
-    GenServer.call(server, {:get_state}, :infinity)
+  def getState(server) do
+    GenServer.call(server, {:getState}, :infinity)
   end
 
-  def get_dead_nodes(server) do
-    # node_name is passed
-    GenServer.call(server, {:get_dead_nodes}, :infinity)
+  def getDeadNodes(server) do
+    # nodeName is passed
+    GenServer.call(server, {:getDeadNodes}, :infinity)
   end
 
   def init(:ok) do
-    {:ok, %{:dead_nodes => [], :neighbors => %{}}}
+    {:ok, %{:deadNodes => [], :neighbors => %{}}}
   end
 
-  def handle_cast({:set_neighbors, args}, state) do
-    {node_name, node_neighbors} = args
-    neighbors_list = Map.fetch!(state, :neighbors)
-    neighbors_list = Map.put(neighbors_list, node_name, node_neighbors)
-    state = Map.replace!(state, :neighbors, neighbors_list)
+  def handle_cast({:setNeighbors, args}, state) do
+    {nodeName, neighbors} = args
+    neighborsList = Map.fetch!(state, :neighbors)
+    neighborsList = Map.put(neighborsList, nodeName, neighbors)
+    state = Map.replace!(state, :neighbors, neighborsList)
     {:noreply, state}
   end
 
-  def handle_cast({:update_neighbors, args}, state) do
-    {node_name, node_neighbors} = args
-    neighbors_list = Map.fetch!(state, :neighbors)
-    current_neighbors = Map.fetch!(neighbors_list, node_name)
-    node_neighbors = current_neighbors ++ node_neighbors
-    neighbors_list = Map.put(neighbors_list, node_name, node_neighbors)
-    state = Map.replace!(state, :neighbors, neighbors_list)
+  def handle_cast({:updateNeighbors, args}, state) do
+    {nodeName, neighbors} = args
+    neighborsList = Map.fetch!(state, :neighbors)
+    currentNeighbors = Map.fetch!(neighborsList, nodeName)
+    neighbors = currentNeighbors ++ neighbors
+    neighborsList = Map.put(neighborsList, nodeName, neighbors)
+    state = Map.replace!(state, :neighbors, neighborsList)
     {:noreply, state}
   end
 
   # termination for GOSSIP
-  def handle_cast({:gossip_done, node_name}, state) do
-    neighbors_list = Map.fetch!(state, :neighbors)
-    dead_nodes = Map.fetch!(state, :dead_nodes)
-    dead_nodes = [node_name | dead_nodes]
-    dead_nodes = Enum.uniq(dead_nodes)
+  def handle_cast({:gossipCompleted, nodeName}, state) do
+    neighborsList = Map.fetch!(state, :neighbors)
+    deadNodes = Map.fetch!(state, :deadNodes)
+    deadNodes = [nodeName | deadNodes]
+    deadNodes = Enum.uniq(deadNodes)
 
-    neighbors_list_count = Enum.count(Map.keys(neighbors_list))
-#    IO.inspect([dead_nodes | neighbors_list_count], label: "DEAD")
-    # terminating when all the nodes are dead
-    #    IO.inspect([[node_name | neighbors_list] | neighbors_list_count])
-    if Enum.count(dead_nodes) == neighbors_list_count - 1 do
+    neighborsCount = Enum.count(Map.keys(neighborsList))
+
+    if Enum.count(deadNodes) == neighborsCount - 1 do
 #      IO.puts("ALL FINISHED!!")
       send(Main, {:done})
     end
 
 
-    state = Map.replace!(state, :dead_nodes, dead_nodes)
+    state = Map.replace!(state, :deadNodes, deadNodes)
     {:noreply, state}
   end
 
   # termination for PushSum
-  def handle_cast({:delete_me, node_name}, state) do
-    dead_nodes = Map.fetch!(state, :dead_nodes)
+  def handle_cast({:deleteCurrentNode, nodeName}, state) do
+    deadNodes = Map.fetch!(state, :deadNodes)
     # adding node name to dead nodes list
-    if node_name not in dead_nodes do
-      dead_nodes = [node_name | dead_nodes]
-      state = Map.replace!(state, :dead_nodes, dead_nodes)
-      neighbors_list = Map.fetch!(state, :neighbors)
-      neighbors_list_count = Enum.count(Map.keys(neighbors_list))
-#      IO.inspect([dead_nodes | neighbors_list_count], label: "DEAD NODES")
-      # terminating when all the nodes have terminated
-      if Enum.count(dead_nodes) == neighbors_list_count do
-#        IO.inspect([dead_nodes | neighbors_list_count], label: "ALL DEAD")
-#         Enum.each(dead_nodes, fn node ->
-#           state = NodeNetwork.getState(node)
-#           s = Map.fetch!(state, :s)
-#           w = Map.fetch!(state, :w)
-#           IO.inspect(s / w)
-#         end)
-#         IO.puts("All done!!")
+    if nodeName not in deadNodes do
+      deadNodes = [nodeName | deadNodes]
+      state = Map.replace!(state, :deadNodes, deadNodes)
+      neighborsList = Map.fetch!(state, :neighbors)
+      neighborsCount = Enum.count(Map.keys(neighborsList))
+
+      if Enum.count(deadNodes) == neighborsCount do
+
         send(Main, {:done})
       end
 
@@ -104,11 +94,11 @@ defmodule Listener do
     end
   end
 
-  def handle_call({:get_dead_nodes}, _from, state) do
-    {:reply, state[:dead_nodes], state}
+  def handle_call({:getDeadNodes}, _from, state) do
+    {:reply, state[:deadNodes], state}
   end
 
-  def handle_call({:get_state}, _from, state) do
+  def handle_call({:getState}, _from, state) do
     {:reply, state, state}
   end
 end

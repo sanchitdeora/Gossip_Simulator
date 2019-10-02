@@ -19,7 +19,7 @@ defmodule HoneycombNetwork do
       state = NodeNetwork.getState(child)
       neighbors = Map.fetch!(state, :neighbors)
 #      IO.inspect(neighbors, label: "state12345")
-      Listener.set_neighbors(MyListener, {child, neighbors})
+      Listener.setNeighbors(MyListener, {child, neighbors})
 #      IO.inspect(neighbors, label: "state of #{child}")
     end)
 
@@ -81,7 +81,7 @@ defmodule HoneycombNetwork do
 #        state = NodeNetwork.getState(currElem2)
 #        IO.inspect([currElem2 | Map.fetch!(state, :neighbors)], label: "state2")
 
-#        Listener.set_neighbors(MyListener, {current, [prev] ++ [next]})
+#        Listener.setNeighbors(MyListener, {current, [prev] ++ [next]})
 
       else
 
