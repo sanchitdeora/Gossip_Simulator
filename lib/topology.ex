@@ -13,16 +13,16 @@ defmodule Topology do
                  rand2DNetwork(childNames)
 
       :torus3D -> max = findMax(numNodes)
-                  IO.inspect(max, label: "max")
+#                  IO.inspect(max, label: "max")
                   newNumNodes = calculateNodes(max, numNodes)
-                  IO.inspect(newNumNodes, label: "#{max}")
+#                  IO.inspect(newNumNodes, label: "#{max}")
 
                   childNames = createChild(newNumNodes, algorithm)
                   Torus3DNetwork.create(childNames, max)
 
       :honeycomb -> newNumNodes =
                       if rem(numNodes, 16) != 0 do
-                        newNumNodes = numNodes - rem(numNodes, 16) + 16
+                        numNodes - rem(numNodes, 16) + 16
                       else
                         numNodes
                       end
@@ -31,7 +31,7 @@ defmodule Topology do
 
       :randhoneycomb -> newNumNodes =
                           if rem(numNodes, 16) != 0 do
-                            newNumNodes = numNodes - rem(numNodes, 16) + 16
+                            numNodes - rem(numNodes, 16) + 16
                           else
                             numNodes
                           end
@@ -57,7 +57,7 @@ defmodule Topology do
 
     {:ok, pid} = Supervisor.start_link(children, strategy: :one_for_one)
     Process.register pid, SuperV
-    {:ok, listener} = Listener.start_link(name: MyListener)
+    {:ok, _listener} = Listener.start_link(name: MyListener)
 
     childNodes = Supervisor.which_children(pid)
 #    IO.inspect(childNodes)
@@ -68,8 +68,8 @@ defmodule Topology do
         currName
       end)
 
-    IO.inspect(childNames)
-
+#    IO.inspect(childNames)
+      childNames
 
   end
 
@@ -120,9 +120,9 @@ defmodule Topology do
 
   defp rand2DNeighbors(current, positions) do
 
-    {node1, {x1, y1}} = current
+    {_node1, {x1, y1}} = current
 #    IO.inspect(current, label: "Main")
-    neighbors = Enum.map(List.delete(positions, current), fn next ->
+    _neighbors = Enum.map(List.delete(positions, current), fn next ->
       {node2, {x2, y2}} = next
 #      IO.inspect(next, label: "Inside")
       distance = :math.pow((x2 - x1),2) + :math.pow((y2 - y1),2) |> :math.sqrt()
@@ -146,7 +146,7 @@ defmodule Topology do
     end)
     maxList = Enum.sort(maxList)
     {_, max} = List.first(maxList)
-    IO.inspect(max)
+    max
   end
 
   def calculateNodes(max, n) do

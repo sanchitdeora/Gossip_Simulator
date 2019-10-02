@@ -7,7 +7,7 @@ defmodule HoneycombNetwork do
     # Create the required number of nodes and get the list of all nodes
     childList = createStructure(childNames, 0, 0)
 
-    IO.inspect(childList, label: "HEY")
+#    IO.inspect(childList, label: "HEY")
 
     addHoneyCombNeighbor(childList)
 
@@ -20,7 +20,7 @@ defmodule HoneycombNetwork do
       neighbors = Map.fetch!(state, :neighbors)
 #      IO.inspect(neighbors, label: "state12345")
       Listener.set_neighbors(MyListener, {child, neighbors})
-      IO.inspect(neighbors, label: "state of #{child}")
+#      IO.inspect(neighbors, label: "state of #{child}")
     end)
 
   end
@@ -116,12 +116,12 @@ defmodule HoneycombNetwork do
     child = Enum.fetch!(randomList, 0)
     state = NodeNetwork.getState(child)
     neighbors = Map.fetch!(state, :neighbors)
-    IO.inspect(neighbors, label: "#{child}")
+#    IO.inspect(neighbors, label: "#{child}")
     otherNodes = randomList -- neighbors
     otherNodes = otherNodes -- [child]
-    IO.inspect(otherNodes, label: "other nodes of #{child}")
+#    IO.inspect(otherNodes, label: "other nodes of #{child}")
     randomNeighbor = Enum.random(otherNodes)
-    IO.inspect(randomNeighbor, label: "#{child}")
+#    IO.inspect(randomNeighbor, label: "#{child}")
     NodeNetwork.updateNeighbors(child, randomNeighbor)
     NodeNetwork.updateNeighbors(randomNeighbor, child)
     randomList = randomList -- [child]

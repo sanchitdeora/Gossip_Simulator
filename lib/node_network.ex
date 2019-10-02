@@ -21,7 +21,9 @@ defmodule NodeNetwork do
   def getState(server) do
     GenServer.call(server, {:getState})
   end
-
+  def die(server) do
+    GenServer.cast(server, {:die, server})
+  end
   def removeNeighbor(server, args) do
     GenServer.cast(server, {:removeNeighbor, [server | args]})
   end
@@ -64,7 +66,7 @@ defmodule NodeNetwork do
   def handle_cast({:setNeighbors, args}, state) do
     [server | args] = args
     state = Map.replace!(state, :neighbors, args)
-    IO.inspect(state, label: "#{server}")
+#    IO.inspect(state, label: "#{server}")
     {:noreply, state}
   end
 
@@ -72,7 +74,7 @@ defmodule NodeNetwork do
     [server | nodeName] = args
     neighbors = Map.fetch!(state, :neighbors)
     neighbors = neighbors ++ [nodeName]
-    IO.inspect(neighbors, label: "#{server}")
+#    IO.inspect(neighbors, label: "#{server}")
     state = Map.replace!(state, :neighbors, neighbors)
     {:noreply, state}
   end
@@ -87,6 +89,16 @@ defmodule NodeNetwork do
     {:noreply, state}
   end
 
+  def handle_cast({:die, server}, state) do
+    neighbors = Map.fetch!(state, :neighbors)
+    Enum.each(neighbors, fn neighbor ->
+      NodeNetwork.removeNeighbor(neighbor, server)
+    end)
+    Listener.delete_me(MyListener, server)
+    {:noreply, state}
+  end
+
+
   def handle_cast({:gossip, args}, state) do
     {server, algorithm, message} = args
 #    IO.inspect(server)
@@ -97,7 +109,7 @@ defmodule NodeNetwork do
 
     neighbors = Map.get(state, :neighbors)
 #    IO.inspect(neighbors)
-    IO.inspect([count | [neighbors]], label: "#{server}")
+#    IO.inspect([count | [neighbors]], label: "#{server}")
 
     if count < 10 do
 
@@ -109,7 +121,7 @@ defmodule NodeNetwork do
       else
 
         nextNeighbor = Enum.random(neighbors)
-        IO.inspect([server | nextNeighbor], label: "Next Neighbor")
+#        IO.inspect([server | nextNeighbor], label: "Next Neighbor")
         NodeNetwork.gossip(nextNeighbor, {nextNeighbor, algorithm, "MESSAGE"})
 
         if count < 5 do
@@ -123,7 +135,7 @@ defmodule NodeNetwork do
         {:noreply, Map.replace!(state, :count, count + 1)}
       end
     else
-      IO.inspect([count | [neighbors]], label: "I'm done #{server}")
+#      IO.inspect([count | [neighbors]], label: "I'm done #{server}")
 
       # delete current node from all the neighbors list
       Enum.each(Map.get(state, :neighbors), fn neighbor_node ->
@@ -135,7 +147,7 @@ defmodule NodeNetwork do
        Listener.gossip_done(MyListener, server)
 
       if neighbors == [] do
-        IO.inspect(Map.get(state, :neighbors),label: "No neighbors to reach for #{server}!!!!!!!!!!!!!!!!!!!!!!!")
+#        IO.inspect(Map.get(state, :neighbors),label: "No neighbors to reach for #{server}!!!!!!!!!!!!!!!!!!!!!!!")
         Listener.delete_me(MyListener, server)
         StartNetwork.start(algorithm)
         {:noreply, state}
@@ -169,7 +181,7 @@ defmodule NodeNetwork do
 
     # when the current node has no neighbors to communicate
     if neighbors == [] do
-      # IO.puts("No neighbors to reach")
+#      IO.inspect(Map.get(state, :neighbors),label: "No neighbors to reach for #{server}!!!!!!!!!!!!!!!!!!!!!!!")
       Listener.delete_me(MyListener, server)
       StartNetwork.start(:pushsum)
       {:noreply, state}
@@ -189,17 +201,17 @@ defmodule NodeNetwork do
 
           next_neighbor = Enum.random(Map.get(state, :neighbors))
           NodeNetwork.pushsum(next_neighbor, {next_neighbor, s_t, w_t})
-#          IO.inspect([next_neighbor| [Map.fetch!(state, :s) | Map.fetch!(state, :w)]] ,label: "#{server}")
+#          IO.inspect([[[next_neighbor]| [Map.fetch!(state, :s) / Map.fetch!(state, :w)]] | [Map.fetch!(state, :s) | Map.fetch!(state, :w)]] ,label: "ENDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD #{server}")
           Listener.delete_me(MyListener, server)
           state = Map.replace!(state, :s, s_t)
           state = Map.replace!(state, :w, w_t)
 
-          # delete current node from all the neighbors list
+#           delete current node from all the neighbors list
           Enum.each(neighbors, fn neighbor_node ->
             NodeNetwork.removeNeighbor(neighbor_node, server)
           end)
 
-          # IO.inspect "I'm terminating"
+#           IO.inspect "I'm terminating"
           {:noreply, state}
         else
           state = Map.replace!(state, :s, s_t)
@@ -209,7 +221,7 @@ defmodule NodeNetwork do
           queue = :queue.in(ratio_diff, queue)
           state = Map.replace!(state, :queue, queue)
           NodeNetwork.pushsum(next_neighbor, {next_neighbor, s_t, w_t})
-#          IO.inspect([next_neighbor| [Map.fetch!(state, :s) | Map.fetch!(state, :w)]] ,label: "#{server}")
+#          IO.inspect([[[next_neighbor]| [Map.fetch!(state, :s) / Map.fetch!(state, :w)]] | [Map.fetch!(state, :s) | Map.fetch!(state, :w)]] ,label: "#{server}")
           {:noreply, state}
         end
       else

@@ -16,17 +16,17 @@ defmodule Torus3DNetwork do
         from_list(list)
       end)
 #
-    IO.inspect(list_2darray, label: "list2d")
+#    IO.inspect(list_2darray, label: "list2d")
 #
     d3array = 0..length(list_2darray) |> Stream.zip(list_2darray) |> Enum.into(%{})
 
-    IO.inspect(d3array, label: "list3d")
+#    IO.inspect(d3array, label: "list3d")
 #
 #    # IO.inspect(d3array)
 #
     # setting up basic 2D grip topology
-    Enum.each(d3array, fn {key, val} ->
-      IO.inspect(val, label: "value")
+    Enum.each(d3array, fn {_key, val} ->
+#      IO.inspect(val, label: "value")
       d2_setup(val, sqroot_each_n)
     end)
 
@@ -141,17 +141,17 @@ defmodule Torus3DNetwork do
               cond do
                 x == 0 -> NodeNetwork.updateNeighbors(elem, d3array[z][y][sqroot_each_n - 1])
                 x == sqroot_each_n - 1 -> NodeNetwork.updateNeighbors(elem, d3array[z][y][0])
-                true ->
+                true -> []
               end
               cond do
                 y == 0 -> NodeNetwork.updateNeighbors(elem, d3array[z][sqroot_each_n - 1][x])
                 y == sqroot_each_n - 1 -> NodeNetwork.updateNeighbors(elem, d3array[z][0][x])
-                true ->
+                true -> []
               end
               cond do
                 z == 0 -> NodeNetwork.updateNeighbors(elem, d3array[max - 1][y][x])
                 z == max - 1 -> NodeNetwork.updateNeighbors(elem, d3array[0][y][x])
-                true ->
+                true -> []
               end
 
           end)

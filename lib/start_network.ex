@@ -12,7 +12,7 @@ defmodule StartNetwork do
 
     dead_nodes = Listener.get_dead_nodes(MyListener)
     alive_nodes = childNames -- dead_nodes
-    IO.inspect([alive_nodes], label: "ALIVE NODES:")
+#    IO.inspect([alive_nodes], label: "ALIVE NODES:")
 
     if length(alive_nodes) > 1 do
       firstNode = Enum.random(childNames)
@@ -24,7 +24,7 @@ defmodule StartNetwork do
         :pushsum -> NodeNetwork.pushsum(firstNode, {firstNode, 0, 0})
       end
     else
-      IO.puts("!!!!!!!!!!!!!!!!!!!! GOT DONE HEREE !!!!!!!!!!!!!!!!")
+#      IO.puts("!!!!!!!!!!!!!!!!!!!! GOT DONE HEREE !!!!!!!!!!!!!!!!")
       send Main, {:done}
     end
 
