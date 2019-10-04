@@ -96,11 +96,11 @@ Random Honeycomb	      5000		188406
 ```
 Topology		Maximum Nodes	Convergence Time
 Full				5000		217852
-Line				700			1059579
+Line				700		1059579
 Random 2D			5000		240658
 3D Torus			5000		172610
 Honeycomb			2000		515266
-Random Honeycomb	     5000		61766
+Random Honeycomb	      5000	61766
 ```
 
 
