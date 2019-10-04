@@ -1,3 +1,5 @@
+# Keeps tracks of all the Node Neighbors and Dead Nodes in the network
+
 defmodule Listener do
   use GenServer
 
@@ -14,12 +16,10 @@ defmodule Listener do
   end
 
   def deleteCurrentNode(server, nodeName) do
-    # nodeName is passed
     GenServer.cast(server, {:deleteCurrentNode, nodeName})
   end
 
   def gossipCompleted(server, nodeName) do
-    # nodeName is passed
     GenServer.cast(server, {:gossipCompleted, nodeName})
   end
 
@@ -60,14 +60,11 @@ defmodule Listener do
     deadNodes = Map.fetch!(state, :deadNodes)
     deadNodes = [nodeName | deadNodes]
     deadNodes = Enum.uniq(deadNodes)
-
     neighborsCount = Enum.count(Map.keys(neighborsList))
 
     if Enum.count(deadNodes) == neighborsCount - 1 do
-#      IO.puts("ALL FINISHED!!")
       send(Main, {:done})
     end
-
 
     state = Map.replace!(state, :deadNodes, deadNodes)
     {:noreply, state}
@@ -76,7 +73,6 @@ defmodule Listener do
   # termination for PushSum
   def handle_cast({:deleteCurrentNode, nodeName}, state) do
     deadNodes = Map.fetch!(state, :deadNodes)
-    # adding node name to dead nodes list
     if nodeName not in deadNodes do
       deadNodes = [nodeName | deadNodes]
       state = Map.replace!(state, :deadNodes, deadNodes)

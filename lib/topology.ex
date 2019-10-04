@@ -1,5 +1,6 @@
 defmodule Topology do
 
+  # Start creating network here
   def createNetwork(numNodes, topology, algorithm) do
 
     case topology do
@@ -13,9 +14,7 @@ defmodule Topology do
                  rand2DNetwork(childNames)
 
       :torus3D -> max = findMax(numNodes)
-#                  IO.inspect(max, label: "max")
                   newNumNodes = calculateNodes(max, numNodes)
-#                  IO.inspect(newNumNodes, label: "#{max}")
 
                   childNames = createChild(newNumNodes, algorithm)
                   Torus3DNetwork.create(childNames, max)
@@ -41,7 +40,8 @@ defmodule Topology do
 
   end
 
-  def createChild(numNodes, algorithm) do
+  # Creates children for the Supervisor
+  defp createChild(numNodes, algorithm) do
 
     children =
       Enum.map(0..(numNodes - 1), fn i ->
@@ -52,8 +52,6 @@ defmodule Topology do
           start: {NodeNetwork, :start_link, [{algorithm, i}, [name: nodeName]]}
         }
       end)
-#    IO.inspect(children)
-
 
     {:ok, pid} = Supervisor.start_link(children, strategy: :one_for_one)
     Process.register pid, SuperV
@@ -70,11 +68,12 @@ defmodule Topology do
 
 #    IO.inspect(childNames)
       childNames
-
   end
 
-  def fullNetwork(childNames) do
+  # Creates full network topology
+  defp fullNetwork(childNames) do
 
+    # Every node is linked to the other nodes in the network
     Enum.map(childNames, fn currName ->
       NodeNetwork.setNeighbors(currName, List.delete(childNames, currName))
       Listener.setNeighbors(MyListener, {currName, List.delete(childNames, currName)})
@@ -82,12 +81,15 @@ defmodule Topology do
 
   end
 
-  def lineNetwork(childNames) do
-#    IO.inspect(length(childNames))
+  # Creates line network topology
+  defp lineNetwork(childNames) do
+
+    # Neighbors of first node is set
     first = Enum.fetch!(childNames, 0)
     NodeNetwork.setNeighbors(first, [Enum.fetch!(childNames, 1)])
     Listener.setNeighbors(MyListener, {first, [Enum.fetch!(childNames, 1)]})
 
+    # Neighbors of the nodes lying in the middle are set
     Enum.map(1..length(childNames) - 2, fn i ->
       prev = Enum.fetch!(childNames, (i - 1))
       next = Enum.fetch!(childNames, (i + 1))
@@ -96,19 +98,26 @@ defmodule Topology do
       Listener.setNeighbors(MyListener, {current, [prev] ++ [next]})
     end)
 
+    # Neighbors of last node is set
     last = Enum.fetch!(childNames, (length(childNames)-1))
     NodeNetwork.setNeighbors(last, [Enum.fetch!(childNames, (length(childNames)-2))])
     Listener.setNeighbors(MyListener, {last, [Enum.fetch!(childNames, (length(childNames)-2))]})
 
   end
 
-  def rand2DNetwork(childNames) do
+  # Creates random2D grid topology
+  defp rand2DNetwork(childNames) do
+
+    # Generates random x, y position for each node
     positions = Enum.map(childNames, fn currChild ->
       x = Float.round(:rand.uniform(), 2)
       y = Float.round(:rand.uniform(), 2)
       {currChild, {x, y}}
     end)
+
 #    IO.inspect(positions)
+
+    # Each neighbor is assigned to the remaining nodes in the network, if the Euclidean distance is less than 0.1
     Enum.map(positions, fn currChild ->
       neighbors = rand2DNeighbors(currChild, positions) |> Enum.filter(& !is_nil(&1))
 #      IO.inspect(neighbors)
@@ -116,31 +125,34 @@ defmodule Topology do
       NodeNetwork.setNeighbors(current, neighbors)
       Listener.setNeighbors(MyListener, {current, neighbors})
     end)
+
   end
 
+  # Checks the condition and generates a list for neighbors of the input node
   defp rand2DNeighbors(current, positions) do
 
     {_node1, {x1, y1}} = current
-#    IO.inspect(current, label: "Main")
-    _neighbors = Enum.map(List.delete(positions, current), fn next ->
+
+    neighbors = Enum.map(List.delete(positions, current), fn next ->
       {node2, {x2, y2}} = next
-#      IO.inspect(next, label: "Inside")
       distance = :math.pow((x2 - x1),2) + :math.pow((y2 - y1),2) |> :math.sqrt()
-#      IO.inspect(distance)
-      if distance < 0.6 do
+      if distance < 0.1 do
         node2
       end
     end)
+
   end
 
-  def findMax(n) when (n < 27) do
+  # Used to find max for 3D Torus
+  defp findMax(n) when (n < 27) do
     2
   end
-  def findMax(n) when (n < 64 and n >= 27) do
+  defp findMax(n) when (n < 64 and n >= 27) do
     3
   end
 
-  def findMax(n) do
+  # Checks for the lowest required nodes in the network
+  defp findMax(n) do
     maxList = Enum.map(6..3, fn x ->
       {calculateNodes(x, n), x}
     end)
@@ -149,8 +161,8 @@ defmodule Topology do
     max
   end
 
-  def calculateNodes(max, n) do
-#    IO.inspect(max, label: "#{n}")
+  # Calculates the number of nodes required for given max in 3D Torus
+  defp calculateNodes(max, n) do
     each_n = (n / max) |> :math.ceil() |> trunc
     sq_root = :math.sqrt(each_n)
     each_n = (:math.ceil(sq_root) * :math.ceil(sq_root)) |> trunc

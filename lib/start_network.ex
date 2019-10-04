@@ -1,7 +1,7 @@
 defmodule StartNetwork do
+
+  # Starts the network
   def start(algorithm) do
-
-
 
     childNodes = Supervisor.which_children(SuperV)
     childNames =
@@ -10,21 +10,21 @@ defmodule StartNetwork do
         currentName
       end)
 
+    # Check the number of dead and alive nodes
     deadNodes = Listener.getDeadNodes(MyListener)
-    alive_nodes = childNames -- deadNodes
-#    IO.inspect([alive_nodes], label: "ALIVE NODES:")
+    aliveNodes = childNames -- deadNodes
 
-    if length(alive_nodes) > 1 do
+    # If there are more than 1 node alive, starts the network
+    if length(aliveNodes) > 1 do
       firstNode = Enum.random(childNames)
 
       case algorithm do
-
         :gossip -> NodeNetwork.gossip(firstNode, {firstNode, algorithm, "MESSAGE"})
 
         :pushsum -> NodeNetwork.pushsum(firstNode, {firstNode, 0, 0})
       end
+
     else
-#      IO.puts("!!!!!!!!!!!!!!!!!!!! GOT DONE HEREE !!!!!!!!!!!!!!!!")
       send Main, {:done}
     end
 

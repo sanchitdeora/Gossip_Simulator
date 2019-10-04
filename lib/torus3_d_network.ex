@@ -1,33 +1,25 @@
 defmodule Torus3DNetwork do
-  # node names need to be CAPITAL
-  # generate a list of children to start under supervisor
+
+  # Creates the 3D Torus Network
   def create(childNames, max) do
 
-#    IO.inspect(childNames, label: "REACHED HERE")
+    # Creates chunks in the list according to the coordinates on the grid
     n = length(childNames)
-#    # each stack will have n/3 nodes - as we will have three stacks
     each_n = (n / max) |> trunc
     sqroot_each_n = :math.sqrt(each_n) |> trunc
     lists = Enum.chunk_every(childNames, each_n)
 
+    # Creating 2D
     list_2darray =
       Enum.map(lists, fn each_list ->
         list = Enum.chunk_every(each_list, sqroot_each_n)
         from_list(list)
       end)
-#
-#    IO.inspect(list_2darray, label: "list2d")
-#
     d3array = 0..length(list_2darray) |> Stream.zip(list_2darray) |> Enum.into(%{})
 
-#    IO.inspect(d3array, label: "list3d")
-#
-#    # IO.inspect(d3array)
-#
     # setting up basic 2D grip topology
     Enum.each(d3array, fn {_key, val} ->
-#      IO.inspect(val, label: "value")
-      d2_setup(val, sqroot_each_n)
+      d2setup(val, sqroot_each_n)
     end)
 
     # setting the 3D neighbors
@@ -36,11 +28,10 @@ defmodule Torus3DNetwork do
     # setting the Torus neighbors
     torusNeighbors(d3array, sqroot_each_n, max)
 
-    # returning supervisor pid
-#    pid
   end
-#
-  def d2_setup(array, sq_root) do
+
+  # Connects all the 2D neighbor of the nodes
+  defp d2setup(array, sq_root) do
     Enum.each(0..(sq_root - 1), fn i ->
       Enum.each(0..(sq_root - 1), fn j ->
         curr = array[i][j]
@@ -106,7 +97,9 @@ defmodule Torus3DNetwork do
     end)
   end
 
-  def d3setup(d3array, sqroot_each_n, max) do
+  # Connects all 3D neighbors of the nodes
+  defp d3setup(d3array, sqroot_each_n, max) do
+
     Enum.each(0..(max - 1), fn k ->
       Enum.each(0..(sqroot_each_n - 1), fn i ->
         Enum.each(0..(sqroot_each_n - 1), fn j ->
@@ -130,7 +123,7 @@ defmodule Torus3DNetwork do
     end)
   end
 
-
+  # Connects all the outer nodes in the grid
   defp torusNeighbors(d3array, sqroot_each_n, max) do
 
     Enum.each(0..(max - 1), fn z ->
@@ -164,7 +157,8 @@ defmodule Torus3DNetwork do
     Listener.setNeighbors(MyListener, {curr, neighbors_list})
   end
 
-  def from_list(list) when is_list(list) do
+  # Used to form Maps of List to get 3D coordinates (x, y, z) for the nodes
+  defp from_list(list) when is_list(list) do
     do_from_list(list)
   end
 

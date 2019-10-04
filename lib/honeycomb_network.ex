@@ -1,5 +1,6 @@
 defmodule HoneycombNetwork do
 
+  # Creates the Honeycomb and Random Honeycomb network
   def create(childNames, randomNeighborBool) do
 
     numNodes = length(childNames)
@@ -7,28 +8,27 @@ defmodule HoneycombNetwork do
     # Create the required number of nodes and get the list of all nodes
     childList = createStructure(childNames, 0, 0)
 
-#    IO.inspect(childList, label: "HEY")
 
     addHoneyCombNeighbor(childList)
 
+    # If RandomNeighborBool = True, then implement Random Honeycomb Network
     if (randomNeighborBool) do
       addRandomNeighbor(childNames)
     end
 
+    # Set final neighbors in MyListener
     Enum.map(childNames, fn child ->
       state = NodeNetwork.getState(child)
       neighbors = Map.fetch!(state, :neighbors)
-#      IO.inspect(neighbors, label: "state12345")
       Listener.setNeighbors(MyListener, {child, neighbors})
-#      IO.inspect(neighbors, label: "state of #{child}")
     end)
 
   end
 
+  # Creates a Honeycomb Structure for the network
   def createStructure(childNames, i, line) when i >= length(childNames) do
     []
   end
-
   def createStructure(childNames, i, line) do
 
     structure =
@@ -42,19 +42,16 @@ defmodule HoneycombNetwork do
 
   end
 
+  # Connects all the neighbors in the Honeycomb structure
   def addHoneyCombNeighbor(childList) do
 
     len = Enum.count(childList)-1
-
     for iter <- 0..len do
 
       currList = Enum.at(childList, iter)
       nextList = Enum.at(childList, rem(iter+1, len+1))
 
       if (Enum.count(Enum.at(currList,0)) != 0) do
-        #first and last
-#        GenServer.call(getNodeVal(cur_node_list,0), {:addNeighbor, [getNodeVal(cur_node_list,7)]})
-#        GenServer.call(getNodeVal(cur_node_list,7), {:addNeighbor, [getNodeVal(cur_node_list,0)]})
 
         currElem1 = Enum.fetch!(Enum.fetch!(currList, 0), 0)
         currElem2 = Enum.fetch!(Enum.fetch!(currList, 7), 0)
@@ -76,12 +73,6 @@ defmodule HoneycombNetwork do
 
         NodeNetwork.updateNeighbors(Enum.fetch!(Enum.fetch!(currList, 7), 0), Enum.fetch!(Enum.fetch!(nextList, 6), 0))
         NodeNetwork.updateNeighbors(Enum.fetch!(Enum.fetch!(nextList, 6), 0), Enum.fetch!(Enum.fetch!(currList, 7), 0))
-
-#
-#        state = NodeNetwork.getState(currElem2)
-#        IO.inspect([currElem2 | Map.fetch!(state, :neighbors)], label: "state2")
-
-#        Listener.setNeighbors(MyListener, {current, [prev] ++ [next]})
 
       else
 
@@ -107,6 +98,7 @@ defmodule HoneycombNetwork do
     end
   end
 
+  # Connect a random node in the network to each node
   def addRandomNeighbor(randomList) when length(randomList) <= 2 do
     []
   end
