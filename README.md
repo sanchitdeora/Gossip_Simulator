@@ -88,7 +88,7 @@ Line				5000		170359
 Random 2D			5000		337297
 3D Torus			5000		143422
 Honeycomb			5000		160756
-Random Honeycomb	5000		188406
+Random Honeycomb	  5000		188406
 ```
 
 #### Push Sum:
@@ -100,7 +100,7 @@ Line				700			1059579
 Random 2D			5000		240658
 3D Torus			5000		172610
 Honeycomb			2000		515266
-Random Honeycomb	5000		61766
+Random Honeycomb	  5000		61766
 ```
 
 
